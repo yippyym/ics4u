@@ -2,9 +2,9 @@
 Author: Yani Mei
 Teacher: Mr. Noukhovitch
 Class: ICS4U1-4A
-Program: Gym 
-Purpose: The following program faciliates a flight booking system that  
-allows users to input various commands. 
+Program: Gym Membership Management System
+Purpose: The following program manages up to 10 gym member subcriptions 
+through classes and objects in C++. 
 */
 
 #include <iostream>
@@ -14,198 +14,186 @@ allows users to input various commands.
 
 using namespace std;
 
-class FlightBooking
+class Gym
 {
 public:
-    FlightBooking(int id, int capacity, int reserved);
-    FlightBooking();
-    void printStatus(vector<FlightBooking *> flight);
+    Gym(int id, string name, int valid);
+    Gym();
+    void printStatus(vector<Gym *> gym);
     int getId() { return this->id; }
-    void addF(int id, int n, vector<FlightBooking *> &fligt);
-    void cancelF(int id, int n, vector<FlightBooking *> &flight);
-    void deleteF(vector<FlightBooking *> &flight, int id);
+    void extend(int id, int n, vector<Gym *> &gym);
+    void cancel(int id, int n, vector<Gym *> &gym);
+    void deleteM(vector<Gym *> &gym, int id);
 
 private:
-    int id, capacity, reserved;
-}; //...end FlightBooking class
+    int id, valid;
+    string name;
+}; //...end Gym class
 
-FlightBooking::FlightBooking()
+Gym::Gym()
 {
-    int id = 0, reserved = 0, capacity = 0;
-} //...end FlightBooking()
+    int id = 0, valid = 0;
+    string name = " ";
+} //...end Gym()
 
-FlightBooking::FlightBooking(int id, int capacity, int reserved)
+Gym::Gym(int id, string name, int valid)
 {
     // store the instance
     this->id = id;
-    this->capacity = capacity;
-    this->reserved = reserved;
-} //...end FlightBooking
+    this->name = name;
+    this->valid = valid;
+} //...end Gym
 
-// function that prints flight status
-void FlightBooking::printStatus(vector<FlightBooking *> flight)
+// function that prints all memberships
+void Gym::printStatus(vector<Gym *> gym)
 {
-    double percent = 0;
-    for (int i = 0; i < flight.size(); i++)
-    {
-        // calculate reservation percentage
-        percent = 100 * ((double)flight[i]->reserved / flight[i]->capacity);
-        cout << "Flight " << flight[i]->id << " : " << flight[i]->reserved << "/" << flight[i]->capacity << " (" << fixed << setprecision(0) << percent << "%) seats reserved.\n";
-    } //...end for
+    for (int i = 0; i < gym.size(); i++)
+        cout << "Member " << gym[i]->id << " : " << gym[i]->name << ", subscription valid for " << gym[i]->valid << " months\n";
 } //...end printStatus
 
-// function that displays status based on flight ID
-int chooseF(vector<FlightBooking *> flight, int id)
+// function that choose the correct member
+int choose(vector<Gym *> gym, int id)
 {
-    // verify that ID exists
-    for (int i = 0; i < flight.size(); i++)
+    // verify ID exists
+    for (int i = 0; i < gym.size(); i++)
     {
-        if (flight[i]->getId() == id)
+        if (gym[i]->getId() == id)
             return i;
-    } //...end for
+    }
 
     // return -1 if ID does not exist
     return -1;
-} //...end showF
+} //...end choose
 
-// function that adds n reservations
-void FlightBooking::addF(int id, int n, vector<FlightBooking *> &flight)
+// function that extends membership by n months
+void Gym::extend(int id, int n, vector<Gym *> &gym)
 {
-    int index = chooseF(flight, id);
+    // extend membership if ID exists, display error if ID does not exist
+    int index = choose(gym, id);
     if (index != -1)
-    {
-        // accept or reject new seats based on current capacity
-        if (((double)(flight[index]->reserved + n) / flight[index]->capacity) * 100 <= 105)
-            flight[index]->reserved += n;
-        else
-            cout << "Cannot perform this operation: capacity reached\n";
-    }
-    // display error message if ID does not exist
+        gym[index]->valid += n;
     else
-        cout << "Cannot perform this operation: flight " << id << " not found" << endl;
-} //...end addF
+        cout << "Cannot perform this operation: member " << id << " not found\n";
+} //...end extend
 
-// function that cancels n seats
-void FlightBooking::cancelF(int id, int n, vector<FlightBooking *> &flight)
+// function that cancels the membership
+void Gym::cancel(int id, int n, vector<Gym *> &gym)
 {
-    int index = chooseF(flight, id);
+    // set valid = 0 if ID exists, display error if ID does not exist
+    int index = choose(gym, id);
     if (index != -1)
-    {
-        // if current seats > n, cancel n seats
-        if (flight[index]->reserved - n >= 0)
-            flight[index]->reserved -= n;
-    }
-    // display error message if ID does not exist
+        gym[index]->valid = 0;
     else
-        cout << "Cannot perform this operation: flight " << id << " not found" << endl;
-} //...end cancelF
+        cout << "Cannot perform this operation: member " << id << " not found\n";
+} //...end cancel
 
-// function that deltes flights from the system
-void FlightBooking::deleteF(vector<FlightBooking *> &flight, int id)
+// function that deletes members from the system
+void Gym::deleteM(vector<Gym *> &gym, int id)
 {
-    int index = chooseF(flight, id);
-    // delete flight if ID exists
+    // delete member if ID exists, display error if ID does not exist
+    int index = choose(gym, id);
     if (index != -1)
     {
-        cout << "Flight " << id << " has been deleted.\n";
-        flight.erase(flight.begin() + index);
-        for (int i = index; i < flight.size(); ++i)
+        cout << "Member " << id << " deleted from the system\n";
+        // erase the vector
+        gym.erase(gym.begin() + index);
+        for (int i = index; i < gym.size(); ++i)
         {
-            flight[i] = flight[i + 1];
+            gym[i] = gym[i + 1];
             i--;
-        } //...end for
+        }
     }
-    // display error message if ID does not exist
     else
-        cout << "Cannot perform this operation: flight " << id << " not found" << endl;
-
-} //...end deleteF
+        cout << "Cannot perform this operation: member " << id << " not found\n";
+} //...end deleteM
 
 int main()
 {
-    // accept up to 10 flights
-    FlightBooking booking[10];
-    vector<FlightBooking *> flight;
+    // set limit to 10 members
+    Gym member[10];
+    vector<Gym *> gym;
 
     // declare variables for function arguments
     int a, b, index, i = 0;
-    string command = " ";
+    string name, command = " ";
 
     // display commands
-    cout << "----------------------------------------------------------\n"
-            "Input your flight information with the following syntax: \n"
-            "id = flight ID, cap = flight capacity, and n = # of seats\n"
-            "\n(1) create[id][cap]\n(2) delete[id]\n(3) add[id][n]\n(4) cancel[id][n]\n"
-            "----------------------------------------------------------\n";
+    cout << "------------------------------------------------------------\n"
+            "Input your membership information with the following syntax \n"
+            "where id = member ID, name = your name, and n = # of months:\n"
+            "\n(1) create[id][name]\n(2) delete[id]\n(3) extend[id][n]\n(4) cancel[id]\n"
+            "------------------------------------------------------------\n"
+            "No members in the system\n";
 
     while (command != "quit")
     {
-        // take user input
+        // take user input with spaces
         cout << endl
              << "Please enter a command: ";
         getline(cin, command);
 
-        // if command includes "create", create new flight
+        // if command includes "create", create new member
         if (command.find("create") != string::npos)
         {
-            // convert a (ID) and b (capacity) from string to integer
+            // convert a (ID) from string to integer
             a = stoi(command.substr(command.find("[") + 1, command.find_first_of("]") - command.find("[") - 1));
-            b = stoi(command.substr(command.find_last_of("[") + 1, command.find_last_of("]") - command.find_last_of("[") - 1));
+            name = command.substr(command.find_last_of("[") + 1, command.find_last_of("]") - command.find_last_of("[") - 1);
 
-            // create new flight if there are less than 10 flights
-            if (i < 10 && a > 0 && b > 0)
+            // create new member if there are >10 members and if ID > 0
+            if (i < 10 && a > 0)
             {
-                booking[i] = FlightBooking(a, b, 0);
-                flight.push_back(&booking[i]);
-                booking[i].printStatus(flight);
+                member[i] = Gym(a, name, 0);
+                gym.push_back(&member[i]);
+                member[i].printStatus(gym);
 
-                // increment number of flights in the system
                 i++;
             }
             else
-                cout << "Cannot perform this operation: maximum flights reached" << endl;
-        } //...end if (command.find("create") != string::npos)
+                cout << "Cannot perform this operation: maximum members reached" << endl;
+        } //...end if
 
-        // if command includes "add", add flight
-        else if (command.find("add") != string::npos)
+        // if command includes "extend", extend membership
+        else if (command.find("extend") != string::npos)
         {
-            // convert a (ID) and b (seats) from string to integer and add reservations
+            // convert a (ID) and b (months) from string to integer
             a = stoi(command.substr(command.find("[") + 1, command.find_first_of("]") - command.find("[") - 1));
             b = stoi(command.substr(command.find_last_of("[") + 1, command.find_last_of("]") - command.find_last_of("[") - 1));
-            booking[i].addF(a, b, flight);
-            booking[i].printStatus(flight);
-        } //...end else if (command.find("add") != string::npos)
 
-        // if command includes "cancel", cancel flights
+            // call extend and printStatus
+            member[i].extend(a, b, gym);
+            member[i].printStatus(gym);
+        } //...end else if
+
+        // if command includes "cancel", cancel membership
         else if (command.find("cancel") != string::npos)
         {
-            // convert a (ID) and b (seats) from string to integer and subtract reservations
+            // convert a (ID) and b (months) from string to integer
             a = stoi(command.substr(command.find("[") + 1, command.find_first_of("]") - command.find("[") - 1));
             b = stoi(command.substr(command.find_last_of("[") + 1, command.find_last_of("]") - command.find_last_of("[") - 1));
-            booking[i].cancelF(a, b, flight);
-            booking[i].printStatus(flight);
-        } //...end else if (command.find("cancel") != string::npos)
 
-        // if command includes "delete", delete flight
+            // call cancel and printStatus
+            member[i].cancel(a, b, gym);
+            member[i].printStatus(gym);
+        } //...end else if
+
+        // if command includes "delete", delete membership
         else if (command.find("delete") != string::npos)
         {
-            // convert a (ID) from string to integer and delete the ID from the system
+            // convert a (ID) from string to integer and call delete and printStatus
             a = stoi(command.substr(command.find("[") + 1, command.find("]") - command.find("[") - 1));
-            booking[i].deleteF(flight, a);
-            booking[i].printStatus(flight);
-        } //...end else if (command.find("delete") != string::npos)
+            member[i].deleteM(gym, a);
+            member[i].printStatus(gym);
+        } //...end else if
 
-        // if command includes "quit", exit program
+        // if command includes "quit", exit the program
         else if (command.find("quit") != string::npos)
         {
-            cout << "Thank you for using the flight booking system.\n";
+            cout << "Thank you for using the gym membership system\n";
             break;
-        }
+        } //...end else if
 
-        // display error message if the command does not exist
+        // if command does not exist, display error message
         else
-            cout << "Cannot perform this operation: invalid command" << endl;
-    } // end while
-
-    return 0;
-} //...end main()
+            cout << "Cannot perform this operation: invalid command\n";
+    }
+}
